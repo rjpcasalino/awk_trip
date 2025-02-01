@@ -1,0 +1,92 @@
+## arith p. 117, The AWK Programming Lang
+
+function choose(A, k, n, i) {
+ for (i = 1; n > 0; i++) {
+   if (rand() < k/n--) {
+     print A[i]
+     k--
+   }
+  }
+}
+
+function randint(n) {
+ return int(rand()*n)+1
+}
+
+function randop() {
+ return substr("+-*/", randint(4), 1)
+}
+
+function randlet() {
+ return substr("abcdefghijklmnopqrstuvwxyz", randint(26), 1)
+}
+
+BEGIN {
+ maxnum = ARGC > 1 ? ARGV[1] : 10 # default size is 10
+ debug = ARGC > 2 ? ARGV[2] : "" # default to empty string
+ ARGV[1] = "-"
+ # srand diff across awks
+ srand()
+ if (debug == "--debug") {
+    print "DEBUG MODE ON!\n"
+    debug = "ON"
+ }
+ # TODO: randomly grab / create one
+ errmsg = "Whoops! Try again! "
+ do {
+  n1 = randint(maxnum)
+  n2 = randint(maxnum)
+  op = randop()
+  printf("%g %s %g = ? ", n1, op, n2)
+  while ((input = getline) >  0)
+   if (op == "+") {
+    if ($0 == n1 + n2) {
+      print "Correct!"
+      break
+     } else if ($0 == "") {
+       printf("Hint: %g ", n1 + n2)
+       continue
+     } else {
+      print errmsg
+      continue
+     }
+    } else if (op == "-") {
+     if ($0 == n1 - n2) {
+       print "Correct!"
+       break
+      } else if ($0 == "") {
+        printf("Hint: %g ", n1 - n2)
+        continue
+      } else {
+       print errmsg
+       continue
+     }
+    } else if (op == "*") {
+     if ($0 == n1 * n2) {
+       print "Correct!"
+       break
+      } else if ($0 == "") {
+        printf("Hint: %g ", n1 * n2)
+        continue
+      } else {
+       print errmsg
+       continue
+     }
+    # It is a common mistake, especially for C programmers, to forget that all numbers
+    # in awk are floating point, and that division of integer-looking constants produces
+    # a real number, not an integer. isn't an integer a real number?
+    } else if (op == "/") {
+     if ($0 == n1 / n2) {
+       print "Correct!"
+       break
+      } else if ($0 == "") {
+        printf("Hint: %g ", n1 / n2)
+        continue
+      } else {
+       if (debug == "ON") { printf "DEBUG %s and %i ", strtonum($0), n1 / n2 }
+       print errmsg
+       continue
+     }
+    }
+  } while (input > 0)
+}
